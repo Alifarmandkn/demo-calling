@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# SPA.Client Architecture Guide
+
+## Overview
+
+This document outlines the feature-based architecture for the SPA.Client application. The architecture follows a modular, encapsulated approach where each feature contains all its related components, hooks, services, and types.
+
+## Architecture Rules
+
+### 1. Feature Encapsulation
+
+- Each feature folder should be **self-contained** and include everything needed for that feature
+- Features should not directly import from other features (use shared components/hooks instead)
+- Each feature must have an `index.ts` barrel export file
+
+### 2. Component Organization
+
+- **Single Purpose**: Each component should do ONE thing only
+- **Feature Components**: Place components specific to a feature within that feature's `components/` directory
+- **Shared Components**: Place reusable components in `src/components/ui/custom/`
+- **Material UI**: Use wrappers from `src/components/ui/material/` (NEVER edit these)
+
+### 3. State Management
+
+- Use **Preact Signals** for all state management
+- Feature-specific state should be managed within the feature
+- Global state should use contexts in `src/context/`
+
+### 4. TypeScript Guidelines
+
+- Follow **S.O.L.I.D.** principles
+- Use entity types from `src/entities/` directory
+- Feature-specific types go in `features/{feature}/types/`
+- All components must be properly typed
+
+### 5. Import Rules
+
+- Features can import from:
+  - `src/components/ui/` (shared UI components)
+  - `src/entities/` (data types)
+  - `src/utils/` (utility functions)
+  - `src/services/` (global services)
+  - `src/hooks/` (global hooks)
+- Features **CANNOT** import from other features directly
+- Use barrel exports (`index.ts`) for clean imports
+
+### 6. File Naming Conventions
+
+- Components: `PascalCase.tsx` (e.g., `UserProfile.tsx`)
+- Hooks: `use{Name}.ts` (e.g., `useAuth.ts`)
+- Services: `{name}Service.ts` (e.g., `apiService.ts`)
+- Types: `{name}.types.ts` (e.g., `user.types.ts`)
+- Utils: `{name}.utils.ts` (e.g., `date.utils.ts`)
+
+### 7. Feature Development Workflow
+
+1. **Create Feature Folder**: Add new feature to `src/features/`
+2. **Update FEATURES.md**: Add feature specifications to the features checklist
+3. **Implement Components**: Build feature-specific components
+4. **Create Barrel Export**: Export public API through `index.ts`
+5. **Update Documentation**: Keep FEATURES.md updated with delivery status
+
+### 8. Testing Strategy
+
+- Each feature should contain its own test files
+- Use `.test.tsx` suffix for component tests
+- Use `.test.ts` suffix for hook/service tests

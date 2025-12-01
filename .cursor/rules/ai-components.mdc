@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Usage of components
+
+- Any time you write in a file, you are only allowed to use and import material components from SPA.Client/src/components/ui/material. Use the wrappers and NEVER edit the wrappers themselves unless you are asked to specifically.
+- Every TSX file must be written in preact and be properly typed with typescript
+
+- Components MUST be single purposed and do one thing. Given complexity increases in a component, then it must be broken down to multiple separate files.
+

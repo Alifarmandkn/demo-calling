@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Avoid rewriting lines that are not relevant for the current change.
+
+- Don't reformat or refactor unrelated things from what you are being asked about.
+- Don't split endpoint grouping, it's structured the that way for security.
+- When we generate pages, always make sure to use enenties as well. 
+- Every component must be using preact and signals for state management. Never change state away to any other way than using signals.
+- Always write your typescript structured after S.O.L.I.D. best practices principles. 

@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Writing components with typescript
+
+- Always make sure that files are single purpose files. If not, then organise them in smaller files and a sensible folder structure within SPA.Client/src/components
+
+- Always make sure that functions follow the linter rules from .eslintrc.json
+
+- DO NOT add functionality that is not relevant to the request or feature, if you are in doubt ask first.

@@ -1,0 +1,14 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+- Step one in every feature is to make a wireframe to represent the idea, this means before implementing you must share your text-based wireframe.
+- Step two is to implement the accepted idea while respective the layout and themeing
+- Step 3 is adding animations for the user interactions and making it smooth and interesting
+- Step 4 is organising the code in proper folder and structure according to the architectureand documenting and updating the feature readme.
+- Every time you are asked to create a feature, you must add or update readme.md file within the feature folder. If it is a general feature, then we add it to the FEATURE.md file in SPA.Client.
+- The readme and FEATURE.md file must indicate the delivery of a feature in the table column with an X
+- The files should only keep definitions such as gherkin user stories.
+- The files should be organised in categories/pages to know which feature is provided where. When you are asked to change or update a feature, you must also update the readme files as the last step of feature development.
