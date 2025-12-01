@@ -198,6 +198,7 @@ export function CallSection({
   return (
     <Box
       sx={{
+        mt: 4,
         py: 4,
         px: 2,
         height: 'auto',
@@ -220,7 +221,7 @@ export function CallSection({
 
       {/* Campaign Selection */}
       <Box sx={{ mb: 3, width: '100%' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ color:'theme.palette.text.secondary', textAlign: 'left', mb: 2 }}>
           Campaigns
         </Typography>
         <CampaignList
@@ -234,7 +235,7 @@ export function CallSection({
       {/* Contact Selection */}
       <Collapse in={!!selectedCampaign} timeout={400} sx={{ width: '100%' }}>
         <Box sx={{ mb: 2, width: '100%' }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ color:'theme.palette.text.secondary', textAlign: 'left', mb: 2 }}>
             Contacts
           </Typography>
           <ContactList

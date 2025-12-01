@@ -74,6 +74,11 @@ export function PhoneNumberInput({
         <Box sx={{ flex: 1 }}>
           <TextField
             fullWidth
+            sx={{
+              '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+                borderRadius: 2,
+              },
+            }}
             label="Phone Number"
             value={phoneNumber}
             onChange={(e) => {
