@@ -11,7 +11,7 @@ console.log(`   API target: ${baseApiUrl}\n`);
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 4000,
+    port: 5173,
     cors: true,
     proxy: {
       // Proxy API calls to the backend
