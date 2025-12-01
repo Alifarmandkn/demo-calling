@@ -1,4 +1,4 @@
-import { Box, TextField, Autocomplete, Typography } from '@mui/material';
+import { Box, TextField, Autocomplete, Typography, Divider } from '@mui/material';
 import { useCountries, CountryOption } from '../../hooks/useCountries';
 import { useThemeContext } from '../../theme/theme';
 
@@ -31,7 +31,8 @@ export function PhoneNumberInput({
 
   return (
     <Box>
-      <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 1 }}>
+            <Divider sx={{ mb: 3 }} />
+      <Typography variant="body2" sx={{ textAlign: 'left', color: theme.palette.text.secondary, mb: 2 }}>
         {label}
       </Typography>
       <Box sx={{ display: 'flex', gap: 2 }}>

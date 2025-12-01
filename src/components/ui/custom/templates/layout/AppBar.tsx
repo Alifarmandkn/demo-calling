@@ -30,7 +30,7 @@ export function AppBar() {
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Tooltip title="DrinkMate" placement="bottom" arrow>
+          <Tooltip title="Mega" placement="bottom" arrow>
             <Box
               sx={{
                 display: 'flex',

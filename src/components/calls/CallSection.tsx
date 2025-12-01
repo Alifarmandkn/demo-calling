@@ -9,7 +9,7 @@ import {
   Avatar,
   Collapse,
 } from '@mui/material';
-import { Phone, PhoneInTalkRounded, PhoneOutlined } from '@mui/icons-material';
+import { Phone, PhoneCallbackRounded, PhoneForwardedRounded } from '@mui/icons-material';
 import { Campaign } from '../../entities/Campaign';
 import { Contact } from '../../entities/Contact';
 import { CampaignList } from './CampaignList';
@@ -205,12 +205,12 @@ export function CallSection({
         flexDirection: 'column',
         justifyContent: 'start',
         alignItems: 'center',
-        borderRadius: 2,
+        borderRadius: 4,
         backgroundColor: hexToRGBA(theme.palette.background.default, 0.75),
       }}
     >
-      <Avatar sx={{ width: 40, height: 40 }}>
-        {direction === 'Inbound' ? <PhoneInTalkRounded /> : <PhoneOutlined />}
+      <Avatar sx={{ width: 120, height: 120, mb: 4, bgcolor: theme.palette.secondary.main, color: theme.palette.brand[100] }}>
+        {direction === 'Inbound' ? <PhoneCallbackRounded sx={{ fontSize: 60 }} /> : <PhoneForwardedRounded sx={{ fontSize: 60 }} />}
       </Avatar>
       <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
         {title}
