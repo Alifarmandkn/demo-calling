@@ -33,7 +33,7 @@ export function useCountries() {
         name: country.Name,
         phoneExtension: country.PhoneExtension,
         language: country.Language,
-        label: `${country.Name} (+${country.PhoneExtension})`,
+        label: `+${country.PhoneExtension} ${country.Name}`,
       }));
 
       setCountries(options);

@@ -6,8 +6,10 @@ import {
   Button,
   CircularProgress,
   Divider,
+  Avatar,
+  Collapse,
 } from '@mui/material';
-import { Phone } from '@mui/icons-material';
+import { Phone, PhoneInTalkRounded, PhoneOutlined } from '@mui/icons-material';
 import { Campaign } from '../../entities/Campaign';
 import { Contact } from '../../entities/Contact';
 import { CampaignList } from './CampaignList';
@@ -17,10 +19,15 @@ import { CampaignService } from '../../services/campaignService';
 import { ContactService } from '../../services/contactService';
 import { CallService } from '../../services/callService';
 import { useCountries, CountryOption } from '../../hooks/useCountries';
+import { hexToRGBA } from '../../utils/colorUtils';
+import { useThemeContext } from '../../theme/theme';
 
 interface CallSectionProps {
   direction: 'Inbound' | 'Outbound';
   title: string;
+  selectedCampaignId: number | null;
+  selectedCampaignDirection: 'Inbound' | 'Outbound' | null;
+  onCampaignSelect: (campaign: Campaign | null) => void;
 }
 
 /**
@@ -28,9 +35,20 @@ interface CallSectionProps {
  * Manages the complete call flow for a direction (Inbound or Outbound)
  * Single Responsibility: Orchestrate campaign selection, contact selection, and call initiation
  */
-export function CallSection({ direction, title }: CallSectionProps) {
+export function CallSection({
+  direction,
+  title,
+  selectedCampaignId,
+  selectedCampaignDirection,
+  onCampaignSelect,
+}: CallSectionProps) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  
+  // Determine if this section's campaign is selected
+  const selectedCampaign =
+    selectedCampaignId && selectedCampaignDirection === direction
+      ? campaigns.find((c) => c.Id === selectedCampaignId) || null
+      : null;
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
@@ -41,6 +59,7 @@ export function CallSection({ direction, title }: CallSectionProps) {
   const { countryOptions, formatPhoneNumber } = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const { theme } = useThemeContext();
 
   // Load campaigns on mount
   useEffect(() => {
@@ -96,10 +115,19 @@ export function CallSection({ direction, title }: CallSectionProps) {
   }, [countryOptions, selectedCountry]);
 
   const handleSelectCampaign = (campaign: Campaign) => {
-    setSelectedCampaign(campaign);
-    setSelectedContact(null);
-    setPhoneNumber('');
-    setPhoneError('');
+    // If clicking the same campaign, deselect it
+    if (selectedCampaign?.Id === campaign.Id) {
+      onCampaignSelect(null);
+      setSelectedContact(null);
+      setPhoneNumber('');
+      setPhoneError('');
+    } else {
+      // Select the new campaign (this will automatically deselect the other side)
+      onCampaignSelect(campaign);
+      setSelectedContact(null);
+      setPhoneNumber('');
+      setPhoneError('');
+    }
   };
 
   const handleSelectContact = (contact: Contact) => {
@@ -168,16 +196,31 @@ export function CallSection({ direction, title }: CallSectionProps) {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        py: 4,
+        px: 2,
+        height: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'start',
+        alignItems: 'center',
+        borderRadius: 2,
+        backgroundColor: hexToRGBA(theme.palette.background.default, 0.75),
+      }}
+    >
+      <Avatar sx={{ width: 40, height: 40 }}>
+        {direction === 'Inbound' ? <PhoneInTalkRounded /> : <PhoneOutlined />}
+      </Avatar>
       <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
         {title}
       </Typography>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2, width: '100%' }} />
 
       {/* Campaign Selection */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
+      <Box sx={{ mb: 3, width: '100%' }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
           Campaigns
         </Typography>
         <CampaignList
@@ -189,9 +232,9 @@ export function CallSection({ direction, title }: CallSectionProps) {
       </Box>
 
       {/* Contact Selection */}
-      {selectedCampaign && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
+      <Collapse in={!!selectedCampaign} timeout={400} sx={{ width: '100%' }}>
+        <Box sx={{ mb: 2, width: '100%' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
             Contacts
           </Typography>
           <ContactList
@@ -201,11 +244,11 @@ export function CallSection({ direction, title }: CallSectionProps) {
             loading={loadingContacts}
           />
         </Box>
-      )}
+      </Collapse>
 
       {/* Phone Number Input and Call Button */}
-      {selectedContact && (
-        <Box sx={{ mt: 'auto', pt: 2 }}>
+      <Collapse in={!!selectedContact} timeout={400} sx={{ width: '100%' }}>
+        <Box sx={{ mt: 'auto', pt: 2, width: '100%' }}>
           <PhoneNumberInput
             selectedCountry={selectedCountry}
             phoneNumber={phoneNumber}
@@ -228,8 +271,8 @@ export function CallSection({ direction, title }: CallSectionProps) {
             </Button>
           </Box>
         </Box>
-      )}
-    </Paper>
+      </Collapse>
+    </Box>
   );
 }
 
