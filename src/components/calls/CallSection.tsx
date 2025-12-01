@@ -9,7 +9,7 @@ import {
   Avatar,
   Collapse,
 } from '@mui/material';
-import { Phone, PhoneCallbackRounded, PhoneForwardedRounded } from '@mui/icons-material';
+import { Phone, PhoneCallbackRounded, PhoneForwardedRounded, CampaignRounded, GroupsRounded } from '@mui/icons-material';
 import { Campaign } from '../../entities/Campaign';
 import { Contact } from '../../entities/Contact';
 import { CampaignList } from './CampaignList';
@@ -234,10 +234,13 @@ export function CallSection({
       <Divider sx={{ my: 2, width: '100%' }} />
 
       {/* Campaign Selection */}
-      <Box sx={{ mb: 3, width: '100%' }}>
-        <Typography variant="body2" sx={{ color:'theme.palette.text.secondary', textAlign: 'left', mb: 2 }}>
-          Campaigns
-        </Typography>
+      <Box sx={{ mb: 2, width: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2,  }}>
+            <CampaignRounded sx={{ fontSize: 20, mr: 1 }} />
+            <Typography variant="body2" sx={{ color:'theme.palette.text.secondary' }}>
+            Campaigns
+            </Typography>
+        </Box>
         <CampaignList
           campaigns={campaigns}
           selectedCampaign={selectedCampaign}
@@ -254,9 +257,12 @@ export function CallSection({
         sx={{ width: '100%' }}
       >
         <Box sx={{ mb: 2, width: '100%' }}>
-          <Typography variant="body2" sx={{ color:'theme.palette.text.secondary', textAlign: 'left', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 2  }}>
+            <GroupsRounded sx={{ fontSize: 20, mr: 1 }} />
+            <Typography variant="body2" sx={{ color:'theme.palette.text.secondary' }}>
             Contacts
-          </Typography>
+            </Typography>
+          </Box>
           <ContactList
             contacts={contacts}
             selectedContact={selectedContact}
