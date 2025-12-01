@@ -55,6 +55,7 @@ export function CallSection({
   const [loadingContacts, setLoadingContacts] = useState(false);
   const [calling, setCalling] = useState(false);
   const [phoneError, setPhoneError] = useState<string>('');
+  const [showContactsCollapse, setShowContactsCollapse] = useState(false);
 
   const { countryOptions, formatPhoneNumber } = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null);
@@ -83,16 +84,29 @@ export function CallSection({
     if (!selectedCampaign) {
       setContacts([]);
       setSelectedContact(null);
+      setShowContactsCollapse(false);
       return;
     }
 
     const loadContacts = async () => {
       setLoadingContacts(true);
+      // Don't show collapse until contacts are loaded to prevent height measurement issues
+      setShowContactsCollapse(false);
       try {
         const fetchedContacts = await ContactService.fetchContactsByCampaign(selectedCampaign.Id);
         setContacts(fetchedContacts);
+        // Use double requestAnimationFrame to ensure DOM is fully updated before measuring
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setShowContactsCollapse(true);
+          });
+        });
       } catch (error) {
         console.error('Error loading contacts:', error);
+        // Still show collapse even on error
+        requestAnimationFrame(() => {
+          setShowContactsCollapse(true);
+        });
       } finally {
         setLoadingContacts(false);
       }
@@ -233,7 +247,12 @@ export function CallSection({
       </Box>
 
       {/* Contact Selection */}
-      <Collapse in={!!selectedCampaign} timeout={400} sx={{ width: '100%' }}>
+      <Collapse 
+        in={showContactsCollapse} 
+        timeout={400} 
+        unmountOnExit={false}
+        sx={{ width: '100%' }}
+      >
         <Box sx={{ mb: 2, width: '100%' }}>
           <Typography variant="body2" sx={{ color:'theme.palette.text.secondary', textAlign: 'left', mb: 2 }}>
             Contacts
