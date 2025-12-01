@@ -16,7 +16,7 @@ function AppContent() {
       <Box
         sx={{
           position: 'relative',
-          minHeight: '100vh',
+          minHeight: 'calc(100vh - 56px)',
           width: '100%',
           overflow: 'hidden',
         }}
@@ -43,7 +43,7 @@ function AppContent() {
             zIndex: 1,
             display: 'flex',
             flexDirection: 'column',
-            minHeight: '100vh',
+            minHeight: 'calc(100vh - 56px)',
           }}
         >
           <AppBar />
