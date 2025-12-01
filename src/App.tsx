@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Container, Box, Typography, Paper, CircularProgress, Alert } from '@mui/material'
+import { Container, Box, Typography, Grid, Avatar, Button, Paper, CircularProgress, Alert } from '@mui/material'
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
-import credentials from '../credentials.json'
+import { Phone } from '@mui/icons-material'
 import { getApiUrl, baseUrl } from './config/apiConfig'
 import './App.css'
 
@@ -23,6 +23,64 @@ interface LoginResponse {
   client_name?: string
 }
 
+interface CallSectionProps {
+  type: 'inbound' | 'outbound'
+  title: string
+  subtitle: string
+}
+
+function CallSection({ type, title, subtitle }: CallSectionProps) {
+  const handleCall = () => {
+    console.log(`Call ${type} initiated`)
+    // Add your call logic here
+  }
+
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        p: 4,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 3,
+      }}
+    >
+      <Avatar
+        sx={{
+          width: 120,
+          height: 120,
+          bgcolor: type === 'inbound' ? 'primary.main' : 'secondary.main',
+        }}
+      >
+        <Phone sx={{ fontSize: 60 }} />
+      </Avatar>
+      <Typography variant="h4" component="h2" gutterBottom>
+        {title}
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center' }}>
+        {subtitle}
+      </Typography>
+      <Button
+        variant="contained"
+        size="large"
+        startIcon={<Phone />}
+        onClick={handleCall}
+        sx={{
+          mt: 2,
+          px: 4,
+          py: 1.5,
+          fontSize: '1.1rem',
+        }}
+      >
+        Call
+      </Button>
+    </Paper>
+  )
+}
+
 function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -30,11 +88,18 @@ function App() {
   const [userData, setUserData] = useState<LoginResponse | null>(null)
 
   useEffect(() => {
-    // Automatically login using credentials from credentials.json
+    // Automatically login using credentials from environment variables
     const performLogin = async () => {
       try {
         setIsLoading(true)
         setError(null)
+
+        const username = import.meta.env.VITE_USERNAME
+        const password = import.meta.env.VITE_PASSWORD
+
+        if (!username || !password) {
+          throw new Error('Missing credentials: VITE_USERNAME and VITE_PASSWORD must be set in .env file')
+        }
 
         const response = await fetch(getApiUrl(`${baseUrl}/auth/login`), {
           method: 'POST',
@@ -42,8 +107,8 @@ function App() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            username: credentials.username,
-            password: credentials.password,
+            username,
+            password,
           }),
         })
 
@@ -88,18 +153,31 @@ function App() {
     performLogin()
   }, [])
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Container maxWidth="sm">
-        <Box sx={{ mt: 8 }}>
-          <Paper elevation={3} sx={{ p: 4 }}>
-            {isLoading ? (
+  if (isLoading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Container maxWidth="sm">
+          <Box sx={{ mt: 8 }}>
+            <Paper elevation={3} sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                 <CircularProgress />
                 <Typography variant="body1">Logging in...</Typography>
               </Box>
-            ) : error ? (
+            </Paper>
+          </Box>
+        </Container>
+      </ThemeProvider>
+    )
+  }
+
+  if (error) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Container maxWidth="sm">
+          <Box sx={{ mt: 8 }}>
+            <Paper elevation={3} sx={{ p: 4 }}>
               <Box>
                 <Alert severity="error" sx={{ mb: 2 }}>
                   Login Failed
@@ -108,26 +186,46 @@ function App() {
                   {error}
                 </Typography>
               </Box>
-            ) : isAuthenticated && userData ? (
-              <Box>
-                <Typography variant="h4" component="h1" gutterBottom>
-                  Welcome!
-                </Typography>
-                <Typography variant="body1" gutterBottom>
-                  You have successfully logged in as {userData.Name} ({userData.Email}).
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                  Role: {userData.Role}
-                </Typography>
-                {userData.client_name && (
-                  <Typography variant="body2" color="text.secondary">
-                    Client: {userData.client_name}
-                  </Typography>
-                )}
-              </Box>
-            ) : null}
-          </Paper>
+            </Paper>
+          </Box>
+        </Container>
+      </ThemeProvider>
+    )
+  }
+
+  if (!isAuthenticated || !userData) {
+    return null
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Welcome, {userData.Name}!
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {userData.Email} • {userData.Role}
+            {userData.client_name && ` • ${userData.client_name}`}
+          </Typography>
         </Box>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <CallSection
+              type="inbound"
+              title="Inbound"
+              subtitle="Receive incoming calls and manage your inbound communications"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <CallSection
+              type="outbound"
+              title="Outbound"
+              subtitle="Make outgoing calls and reach out to your contacts"
+            />
+          </Grid>
+        </Grid>
       </Container>
     </ThemeProvider>
   )

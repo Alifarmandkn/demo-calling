@@ -28,9 +28,10 @@ The app will be available at `http://localhost:5173/`
 
 ## Credentials
 
-Default credentials are stored in `credentials.json`:
-- Username: `demo`
-- Password: `password123`
+Credentials are stored in `.env` file (not tracked by git):
+- Copy `.env.example` to `.env`
+- Set `VITE_USERNAME` and `VITE_PASSWORD` in `.env`
+- The `.env` file is automatically ignored by git to prevent credentials from being uploaded
 
 ## Available Scripts
 
@@ -47,7 +48,8 @@ demo-calling/
 │   ├── App.css          # App styles
 │   ├── main.tsx         # Entry point
 │   └── index.css        # Global styles
-├── credentials.json     # Hardcoded login credentials
+├── .env                 # Environment variables (not tracked by git)
+├── .env.example         # Example environment variables template
 ├── package.json         # Dependencies and scripts
 ├── tsconfig.json        # TypeScript configuration
 └── vite.config.ts       # Vite configuration
