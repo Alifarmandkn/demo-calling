@@ -12,9 +12,12 @@ import {
 import { useThemeContext } from '../../../../../theme/theme';
 import { hexToRGBA } from '../../../../../utils/colorUtils';
 import { MegaLogo } from '../../../svg/MegaLogo';
+import { LoginButton } from '../../../../auth';
+import { useAuth } from '../../../../../hooks/useAuth';
 
 export function AppBar() {
   const { theme, isDarkMode, toggleTheme } = useThemeContext();
+  const { isAuthenticated } = useAuth();
 
   return (
     <MuiAppBar
@@ -44,6 +47,7 @@ export function AppBar() {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {!isAuthenticated && <LoginButton />}
           <Tooltip title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'} placement="bottom" arrow>
             <IconButton size="large" onClick={toggleTheme}>
               {isDarkMode ? <Brightness5Rounded /> : <Brightness2Rounded />}

@@ -16,47 +16,76 @@ export const getRefreshToken = (): string | null => {
   return localStorage.getItem('refresh_token');
 };
 
+// Function to clear authentication data
+// This should be called whenever tokens expire or authentication fails
+export const clearAuth = (): void => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('auth_user');
+  // Dispatch custom event to notify auth state change
+  window.dispatchEvent(new CustomEvent('authStateChanged'));
+};
+
+// Promise to track ongoing refresh attempts and prevent concurrent refreshes
+let refreshPromise: Promise<boolean> | null = null;
+
 // Function to refresh the access token using the refresh token
+// Uses a promise queue to prevent concurrent refresh attempts
 const refreshAccessToken = async (): Promise<boolean> => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    return false;
+  // If a refresh is already in progress, wait for it
+  if (refreshPromise) {
+    return refreshPromise;
   }
 
-  try {
-    const response = await fetch(`/${baseUrl}/auth/token/refresh`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-
-    if (!response.ok) {
+  // Start a new refresh attempt
+  refreshPromise = (async (): Promise<boolean> => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      refreshPromise = null;
       return false;
     }
 
-    const data = await response.json();
+    try {
+      const refreshUrl = getApiUrl(`${baseUrl}/auth/token/refresh`);
+      const response = await fetch(refreshUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
 
-    // Update stored tokens
-    localStorage.setItem('auth_token', data.access_token);
-    if (data.refresh_token) {
-      localStorage.setItem('refresh_token', data.refresh_token);
+      if (!response.ok) {
+        refreshPromise = null;
+        return false;
+      }
+
+      const data = await response.json();
+
+      // Update stored tokens
+      localStorage.setItem('auth_token', data.access_token);
+      if (data.refresh_token) {
+        localStorage.setItem('refresh_token', data.refresh_token);
+      }
+
+      // Update user data
+      const userData = {
+        id: parseInt(data.UserId),
+        username: data.Name,
+        role: data.Role,
+      };
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+
+      refreshPromise = null;
+      return true;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      refreshPromise = null;
+      return false;
     }
+  })();
 
-    // Update user data
-    const userData = {
-      id: parseInt(data.UserId),
-      username: data.Name,
-      role: data.Role,
-    };
-    localStorage.setItem('auth_user', JSON.stringify(userData));
-
-    return true;
-  } catch (error) {
-    console.error('Token refresh failed:', error);
-    return false;
-  }
+  return refreshPromise;
 };
 
 // Base fetch function that automatically includes the auth token and handles token refresh
@@ -82,9 +111,21 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
     });
   };
 
-  const token = getToken();
+  let token = getToken();
+  
+  // If no token is available, try to refresh it first
   if (!token) {
-    throw new Error('No authentication token available');
+    const refreshSuccessful = await refreshAccessToken();
+    if (refreshSuccessful) {
+      token = getToken();
+    }
+    
+    // If still no token after refresh attempt, tokens have expired
+    // Clear auth and throw error (UI will handle showing login button)
+    if (!token) {
+      clearAuth();
+      throw new Error('Authentication expired. Please login again.');
+    }
   }
 
   let response = await makeRequest(token);
@@ -98,19 +139,17 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
       const newToken = getToken();
       if (newToken) {
         response = await makeRequest(newToken);
+      } else {
+        // Refresh succeeded but no token was stored - this shouldn't happen
+        // but handle it gracefully by clearing auth
+        clearAuth();
+        throw new Error('Authentication failed after token refresh');
       }
     }
 
-    // If still 401 after refresh attempt, clear auth and redirect
+    // If still 401 after refresh attempt, tokens are expired - clear auth
     if (response.status === 401) {
-      // Clear authentication data on persistent 401
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('auth_user');
-
-      // Force page refresh to redirect to login
-      window.location.href = '/';
-
+      clearAuth();
       throw new Error('Authentication expired');
     }
   }
