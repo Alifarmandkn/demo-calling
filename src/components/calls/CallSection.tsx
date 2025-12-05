@@ -14,6 +14,7 @@ import { Contact } from '../../entities/Contact';
 import { CampaignList } from './CampaignList';
 import { ContactList } from './ContactList';
 import { PhoneNumberInput } from './PhoneNumberInput';
+import { UserInfoView } from './UserInfoView';
 import { CampaignService } from '../../services/campaignService';
 import { ContactService } from '../../services/contactService';
 import { CallService } from '../../services/callService';
@@ -55,6 +56,8 @@ export function CallSection({
   const [calling, setCalling] = useState(false);
   const [phoneError, setPhoneError] = useState<string>('');
   const [showContactsCollapse, setShowContactsCollapse] = useState(false);
+  const [callActive, setCallActive] = useState(false);
+  const [activeCallContact, setActiveCallContact] = useState<Contact | null>(null);
 
   const { countryOptions, formatPhoneNumber } = useCountries();
   const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(null);
@@ -92,7 +95,7 @@ export function CallSection({
       // Don't show collapse until contacts are loaded to prevent height measurement issues
       setShowContactsCollapse(false);
       try {
-        const fetchedContacts = await ContactService.fetchContactsByCampaign(selectedCampaign.Id);
+        const fetchedContacts = await ContactService.fetchContactsByCampaign(Number(selectedCampaign.Id));
         setContacts(fetchedContacts);
         // Use double requestAnimationFrame to ensure DOM is fully updated before measuring
         requestAnimationFrame(() => {
@@ -187,15 +190,21 @@ export function CallSection({
       );
 
       await CallService.initiateCall({
-        ContactId: selectedContact.Id,
-        CampaignId: selectedCampaign.Id,
+        ContactId: Number(selectedContact.Id),
+        CampaignId: Number(selectedCampaign.Id),
         PhoneNumberOverride: fullPhoneNumber,
       });
 
-      // Reset form after successful call
-      setPhoneNumber('');
-      setSelectedContact(null);
-      alert('Call initiated successfully!');
+      // For Outbound calls, show the user info view
+      if (direction === 'Outbound') {
+        setActiveCallContact(selectedContact);
+        setCallActive(true);
+      } else {
+        // Reset form after successful call for Inbound
+        setPhoneNumber('');
+        setSelectedContact(null);
+        alert('Call initiated successfully!');
+      }
     } catch (error) {
       console.error('Error initiating call:', error);
       const errorMessage =
@@ -207,6 +216,36 @@ export function CallSection({
       setCalling(false);
     }
   };
+
+  const handleBack = () => {
+    setCallActive(false);
+    setActiveCallContact(null);
+    setPhoneNumber('');
+    setSelectedContact(null);
+    setPhoneError('');
+  };
+
+  // Show UserInfoView for Outbound calls when call is active
+  if (direction === 'Outbound' && callActive && activeCallContact) {
+    return (
+      <Box
+        sx={{
+          mt: 4,
+          py: 4,
+          px: 2,
+          height: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'start',
+          alignItems: 'center',
+          borderRadius: 4,
+          backgroundColor: hexToRGBA(theme.palette.background.default, 0.75),
+        }}
+      >
+        <UserInfoView contact={activeCallContact} onBack={handleBack} />
+      </Box>
+    );
+  }
 
   return (
     <Box
